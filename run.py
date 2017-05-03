@@ -27,16 +27,11 @@ import json
 cat1_children = {}  # {cat1_code: children_list}
 cat2_children = {}  # {cat2_code: children_list}
 res = []            # final array for jsonify
-diseases = []       # disease rows container
 
 
 def in_code_range(code, code_range):
     start, end = code_range.split('-')
     return start <= code <= end
-
-with open('disease.csv') as file:
-    reader = csv.DictReader(file, delimiter='\t')
-    diseases = [row for row in reader]
 
 with open('disease_catalog.csv') as file:
     reader = csv.DictReader(file, delimiter='\t')
@@ -58,24 +53,26 @@ with open('disease_catalog.csv') as file:
             'children': cat2_children[code],
         })
 
-for d in diseases:
-    is_inserted = False
-    for k, v in cat2_children.items():
-        if in_code_range(d['code'], k):
-            v.append({
-                'value': d['code'],
-                'label': d['disease'],
-            })
-            is_inserted = True
-            break
-    if is_inserted:
-        continue
-    for k, v in cat1_children.items():
-        if in_code_range(d['code'], k):
-            v.append({
-                'value': d['code'],
-                'label': d['disease'],
-            })
+with open('disease.csv') as file:
+    reader = csv.DictReader(file, delimiter='\t')
+    for d in reader:
+        for k, v in cat2_children.items():
+            if in_code_range(d['code'], k):
+                v.append({
+                    'value': d['code'],
+                    'label': d['disease'],
+                })
+                break
+        else:
+            # not child of any cat2, add it to matched cat1
+            for k, v in cat1_children.items():
+                if in_code_range(d['code'], k):
+                    v.append({
+                        'value': d['code'],
+                        'label': d['disease'],
+                    })
+                    break
 
 with open('diseases.json', 'w', encoding='utf-8') as file:
+    file.write(u'\uFEFF')  # add UTF-8 BOM
     json.dump(res, file, ensure_ascii=False, separators=(',', ':'))
