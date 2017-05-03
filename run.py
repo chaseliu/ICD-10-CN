@@ -1,13 +1,33 @@
+"""
+Input: disease_catalog.csv and disease.csv
+
+Output: 
+
+AntDesign multilevel selector
+
+[{
+  "value": "A00-B99",
+  "label": "某些传染病和寄生虫病",
+  "children": [{
+    "value": "A00-A09",
+    "label": "肠道传染病",
+    "children": [{
+      "value": "A00",
+      "label": "霍乱",
+    }],
+    ...
+  }],
+  ...
+}]
+"""
+
 import csv
 import json
 
-cat1_children = {}
-cat2_children = {}
-cat1_codes = []
-cat2_codes = []
-res = []
-diseases = []
-code_ranges = []
+cat1_children = {}  # {cat1_code: children_list}
+cat2_children = {}  # {cat2_code: children_list}
+res = []            # final array for jsonify
+diseases = []       # disease rows container
 
 
 def in_code_range(code, code_range):
